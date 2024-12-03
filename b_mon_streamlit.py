@@ -32,7 +32,7 @@ with col1:
     geo_json = 'https://cartomap.github.io/nl/wgs84/buurt_2023.geojson'
     
     # Maak een kaartobject aan
-    m = folium.Map(location=[52.3017, 5.6203], zoom_start=12)
+    m = folium.Map(location=[52.3017, 5.6203], zoom_start=12, tiles='CartoDB positron')
     
     # Maak de choropleth kaart
     choropleth = folium.Choropleth(
