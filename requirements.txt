@@ -3,3 +3,4 @@ streamlit
 folium
 numpy
 streamlit-folium
+plotly
