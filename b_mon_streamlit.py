@@ -81,14 +81,17 @@ with col1:
             new_selection = clicked_feature['properties']['statnaam']
             if new_selection in df['WijkenEnBuurten'].values and new_selection != st.session_state.selected_buurt:
                 st.session_state.selected_buurt = new_selection
-                st.experimental_rerun()  # Alleen rerun als er echt iets verandert
+                st.experimental_rerun()
 
 # Rechter kolom voor de grafiek
 with col2:
-    buurten = df['WijkenEnBuurten'].unique()  # .unique() is sneller dan .to_list()
+    buurten = df['WijkenEnBuurten'].tolist()  # Gebruik tolist() in plaats van unique()
     
-    # Gebruik de geselecteerde buurt van de kaart als die er is
-    default_index = np.where(buurten == st.session_state.selected_buurt)[0][0] if st.session_state.selected_buurt in buurten else 0
+    # Fix voor de index conversie
+    if st.session_state.selected_buurt in buurten:
+        default_index = buurten.index(st.session_state.selected_buurt)
+    else:
+        default_index = 0
     
     buurt_selectie = st.selectbox(
         "Selecteer een specifieke buurt om de onderliggende scores op indicatoren te zien:",
@@ -99,7 +102,7 @@ with col2:
     # Optimaliseer de data transformatie
     df_buurt = df[df['WijkenEnBuurten'] == buurt_selectie].set_index('WijkenEnBuurten').T
     
-    # Maak grafiek met minder overhead
+    # Maak grafiek
     fig = px.bar(
         df_buurt,
         x=df_buurt[buurt_selectie],
