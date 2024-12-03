@@ -5,7 +5,7 @@ import folium
 import numpy as np
 from streamlit_folium import folium_static
 
-df = pd.read_csv('data\df_bevolking_z.csv')
+df = pd.read_csv('data/df_bevolking_z.csv')
 df = df.drop(columns='Unnamed: 0')
 
 
