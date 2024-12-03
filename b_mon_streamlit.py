@@ -43,7 +43,7 @@ with col1:
         key_on='feature.properties.statnaam',
         fill_color='YlOrRd',
         nan_fill_opacity=0,
-        fill_opacity=0.3,
+        fill_opacity=0.5,
         line_color='black',
         line_weight=0.00001,
         line_opacity=0.1,
