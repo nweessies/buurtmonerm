@@ -24,7 +24,9 @@ col1, col2 = st.columns(2)
 # Linker kolom voor de kaart
 with col1:
     kolomlijst = df.select_dtypes(include=['float64', 'int64']).columns.tolist()
-    indicator = st.selectbox("Selecteer een indicator:", kolomlijst)
+    default_kolom = 'Totaalscore'  # vervang dit met je gewenste kolomnaam
+    default_index = kolomlijst.index(default_kolom) if default_kolom in kolomlijst else 0
+    indicator = st.selectbox("Selecteer een indicator:", kolomlijst, index=default_index)
     
     # GeoJSON URL
     geo_json = 'https://cartomap.github.io/nl/wgs84/buurt_2023.geojson'
