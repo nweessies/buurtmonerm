@@ -1,1 +1,5 @@
+pandas
 streamlit
+folium
+numpy
+streamlit-folium
