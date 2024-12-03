@@ -2,9 +2,8 @@ import pandas as pd
 import streamlit as st
 import folium
 import numpy as np
-from streamlit_folium import folium_static
+from streamlit_folium import st_folium
 import plotly.express as px
-from streamlit_folium import st_folium  # We gebruiken st_folium in plaats van folium_static
 
 # Page config
 st.set_page_config(layout="wide")
@@ -49,7 +48,7 @@ with col1:
         legend_name='Bevolkingsdichtheid per buurt'
     ).add_to(m)
     
-    # Toevoegen van interactieve GeoJSON laag
+    # Toevoegen van interactieve GeoJSON laag met popup
     geojson = folium.GeoJson(
         geo_json,
         style_function=lambda x: {'fillColor': 'transparent', 'color': 'black', 'weight':'1'},
@@ -67,27 +66,31 @@ with col1:
     map_data = st_folium(m, width=800, height=500)
     
     # Update selected_buurt als er op de kaart wordt geklikt
-    if map_data['last_clicked']:
-        clicked_lat = map_data['last_clicked']['lat']
-        clicked_lng = map_data['last_clicked']['lng']
-        # Hier moet je logica toevoegen om de juiste buurt te vinden op basis van coordinaten
-        # Dit hangt af van je GeoJSON structuur
+    if map_data.get('last_active_drawing'):
+        clicked_feature = map_data['last_active_drawing']
+        if 'properties' in clicked_feature and 'statnaam' in clicked_feature['properties']:
+            selected_buurt = clicked_feature['properties']['statnaam']
+            if selected_buurt in df['WijkenEnBuurten'].values:
+                st.session_state.selected_buurt = selected_buurt
 
 # Rechter kolom voor de grafiek
 with col2:
     buurten = df['WijkenEnBuurten'].to_list()
+    
+    # Gebruik de geselecteerde buurt van de kaart als die er is
+    if st.session_state.selected_buurt and st.session_state.selected_buurt in buurten:
+        default_index = buurten.index(st.session_state.selected_buurt)
+    else:
+        default_index = 0
+    
     buurt_selectie = st.selectbox(
         "Selecteer een specifieke buurt om de onderliggende scores op indicatoren te zien:",
         buurten,
-        index=0 if st.session_state.selected_buurt is None 
-        else buurten.index(st.session_state.selected_buurt)
+        index=default_index
     )
     
-    # Update session state
-    st.session_state.selected_buurt = buurt_selectie
-    
     # Maak grafiek
-    df_buurt = df.query("WijkenEnBuurten == @buurt_selectie")
+    df_buurt = df[df['WijkenEnBuurten'] == buurt_selectie]
     df_buurt = df_buurt.set_index('WijkenEnBuurten')
     df_buurt_transposed = df_buurt.T
     
