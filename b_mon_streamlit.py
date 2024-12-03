@@ -4,6 +4,7 @@ import folium
 import numpy as np
 from streamlit_folium import folium_static
 import plotly.express as px
+from streamlit_folium import st_folium  # We gebruiken st_folium in plaats van folium_static
 
 # Page config
 st.set_page_config(layout="wide")
@@ -59,47 +60,30 @@ with col1:
         highlight_function=lambda x: {'weight': 3, 'color': 'red'},
     ).add_to(m)
     
-    # Add click event handler
-    for feature in geojson.data['features']:
-        buurt_naam = feature['properties']['statnaam']
-        if buurt_naam in df['WijkenEnBuurten'].values:
-            feature['properties']['click_handler'] = f"""
-                <script>
-                    element.on('click', function() {{
-                        parent.postMessage({{
-                            'buurt': '{buurt_naam}'
-                        }}, '*');
-                    }});
-                </script>
-            """
-    
     # Laagcontroles toevoegen
     folium.LayerControl().add_to(m)
     
-    # Display map
-    map_data = folium_static(m, width=800)
+    # Display map en vang events op
+    map_data = st_folium(m, width=800, height=500)
     
-    # Handle map clicks
-    if map_data:
-        st.session_state.selected_buurt = map_data.get('buurt')
+    # Update selected_buurt als er op de kaart wordt geklikt
+    if map_data['last_clicked']:
+        clicked_lat = map_data['last_clicked']['lat']
+        clicked_lng = map_data['last_clicked']['lng']
+        # Hier moet je logica toevoegen om de juiste buurt te vinden op basis van coordinaten
+        # Dit hangt af van je GeoJSON structuur
 
 # Rechter kolom voor de grafiek
 with col2:
-    # Gebruik geselecteerde buurt van kaart of dropdown
     buurten = df['WijkenEnBuurten'].to_list()
-    
-    if st.session_state.selected_buurt:
-        default_idx = buurten.index(st.session_state.selected_buurt)
-    else:
-        default_idx = 0
-        
     buurt_selectie = st.selectbox(
         "Selecteer een specifieke buurt om de onderliggende scores op indicatoren te zien:",
         buurten,
-        index=default_idx
+        index=0 if st.session_state.selected_buurt is None 
+        else buurten.index(st.session_state.selected_buurt)
     )
     
-    # Update session state als selectbox verandert
+    # Update session state
     st.session_state.selected_buurt = buurt_selectie
     
     # Maak grafiek
