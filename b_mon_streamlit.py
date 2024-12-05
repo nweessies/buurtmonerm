@@ -82,7 +82,7 @@ with col1:
                 data=df,
                 columns=['PC5', indicator],
                 key_on='feature.properties.postcode',
-                fill_color='YlOrRd',
+                fill_color='Paired_06',
                 nan_fill_opacity=0.2,
                 fill_opacity=0.7,
                 line_color='black',
