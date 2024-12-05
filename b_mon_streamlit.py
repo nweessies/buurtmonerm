@@ -108,11 +108,11 @@ with col1:
 # Rechter kolom voor de grafiek
 with col2:
     try:
-        if 'WijkenEnBuurten' not in df.columns:
-            st.error("WijkenEnBuurten kolom niet gevonden in de data")
+        if 'PC5' not in df.columns:
+            st.error("PC5 kolom niet gevonden in de data")
             st.stop()
 
-        buurten = df['WijkenEnBuurten'].tolist()
+        buurten = df['PC5'].tolist()
         
         # Gebruik de geselecteerde buurt van de kaart als die er is
         default_index = (buurten.index(st.session_state.selected_buurt) 
@@ -120,13 +120,13 @@ with col2:
                         else 0)
 
         buurt_selectie = st.selectbox(
-            "Selecteer een buurt:",
+            "Selecteer een PC5:",
             buurten,
             index=default_index
         )
 
         # Maak grafiek
-        df_buurt = df[df['WijkenEnBuurten'] == buurt_selectie]
+        df_buurt = df[df['PC5'] == buurt_selectie]
         df_buurt = df_buurt.select_dtypes(include=['float64', 'int64'])
         
         fig = px.bar(
