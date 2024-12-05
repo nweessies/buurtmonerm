@@ -40,7 +40,7 @@ with col1:
         st.write(df[['PC5', indicator]].head())
 
         # GeoJSON 
-    try:
+     try:
         with open('data/PC_5_erm.geojson', 'r') as f:
             geo_data = json.load(f)
         
