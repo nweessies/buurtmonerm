@@ -36,9 +36,7 @@ with col1:
         default_index = kolomlijst.index(default_kolom) if default_kolom in kolomlijst else 0
         indicator = st.selectbox("Selecteer een indicator:", kolomlijst, index=default_index)
 
-        # Debug informatie
-        st.write("Eerste paar rijen van je DataFrame:")
-        st.write(df[['PC5', indicator]].head())
+
 
         # GeoJSON 
         try:
@@ -63,12 +61,7 @@ with col1:
             gdf = gdf.to_crs(epsg=4326)
             filtered_geo_data = json.loads(gdf.to_json())
             
-            st.write("Voorbeeld van postcode formaat in GeoJSON:")
-            st.write(filtered_geo_data['features'][0]['properties']['postcode'])
-            
-            # Data checks
-            st.write("Unieke postcodes in DataFrame:", len(df['PC5'].unique()))
-            st.write("Unieke postcodes in gefilterde GeoJSON:", len({f['properties']['postcode'] for f in filtered_geo_data['features']}))
+        
             
             # Controleer of PC5 in DataFrame aanwezig is
             if 'PC5' not in df.columns:
