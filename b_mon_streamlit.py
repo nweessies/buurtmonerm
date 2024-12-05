@@ -15,7 +15,7 @@ if 'selected_buurt' not in st.session_state:
 
 # Load data
 try:
-    df = pd.read_excel('data/data_bevolking_z-scores.xlsx')  # Veranderd naar read_excel
+    df = pd.read_excel('data/data_bevolking_z-scores.xlsx', engine='openpyxl')
 except Exception as e:
     st.error(f"Error loading data: {e}")
     st.stop()
