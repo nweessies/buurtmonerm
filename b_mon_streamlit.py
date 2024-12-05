@@ -5,6 +5,8 @@ import numpy as np
 from streamlit_folium import st_folium
 import plotly.express as px
 import json
+import geopandas as gpd
+from pyproj import transform, Proj
 
 # Page config
 st.set_page_config(layout="wide")
@@ -14,12 +16,12 @@ if 'selected_buurt' not in st.session_state:
     st.session_state.selected_buurt = None
 
 # Load data
-# Load data
 try:
     df = pd.read_csv('data/data_bevolking_z-scores.xlsx')  # Ondanks .xlsx extensie als CSV inlezen
 except Exception as e:
     st.error(f"Error loading data: {e}")
     st.stop()
+
 st.title('Buurtmonitor Ermelo')
 
 # Maak twee kolommen
@@ -41,10 +43,25 @@ with col1:
         try:
             with open('data/PC_5_erm.geojson', 'r') as f:
                 geo_data = json.load(f)
-                st.write("Voorbeeld van postcode formaat in GeoJSON:")
-                st.write(geo_data['features'][0]['properties']['postcode'])
+                
+            # Convert to GeoDataFrame and transform coordinates
+            gdf = gpd.GeoDataFrame.from_features(geo_data['features'])
+            gdf = gdf.set_crs(epsg=28992)
+            gdf = gdf.to_crs(epsg=4326)
+            geo_data = json.loads(gdf.to_json())
+            
+            st.write("Voorbeeld van postcode formaat in GeoJSON:")
+            st.write(geo_data['features'][0]['properties']['postcode'])
+            
+            # Data checks
+            st.write("Unieke postcodes in DataFrame:", len(df['PC5'].unique()))
+            st.write("Unieke postcodes in GeoJSON:", len({f['properties']['postcode'] for f in geo_data['features']}))
+            
         except FileNotFoundError:
             st.error("GeoJSON bestand niet gevonden")
+            st.stop()
+        except Exception as e:
+            st.error(f"Error bij verwerken GeoJSON: {e}")
             st.stop()
 
         # Controleer of PC5 in DataFrame aanwezig is
@@ -53,12 +70,10 @@ with col1:
             st.stop()
 
         # Maak een kaartobject aan
-# Maak een kaartobject aan
         m = folium.Map(
             location=[52.3017, 5.6203],
             zoom_start=12,
-            tiles='CartoDB positron',
-            crs='EPSG3857'  # Dit is de web mercator projectie die Folium gebruikt
+            tiles='CartoDB positron'
         )
 
         # Maak de choropleth kaart
@@ -75,7 +90,8 @@ with col1:
             line_weight=1,
             line_opacity=0.5,
             legend_name=f'{indicator} per postcode',
-            highlight=True
+            highlight=True,
+            smooth_factor=0
         ).add_to(m)
 
         # Voeg hover toe voor debugging
@@ -83,24 +99,24 @@ with col1:
             if key.startswith('color_map'):
                 choropleth._children[key].add_to(m)
 
-                # Toevoegen van interactieve GeoJSON laag met popup
-                geojson = folium.GeoJson(
-                    geo_data,
-                    style_function=lambda x: {
-                        'fillColor': 'transparent',
-                        'color': 'black',
-                        'weight': '1'
-                    },
-                    tooltip=folium.GeoJsonTooltip(
-                        fields=['postcode'],
-                        aliases=['Postcode'],
-                        localize=True
-                    ),
-                    highlight_function=lambda x: {
-                        'weight': 3,
-                        'color': 'red'
-                    },
-                ).add_to(m)
+        # Toevoegen van interactieve GeoJSON laag met popup
+        geojson = folium.GeoJson(
+            geo_data,
+            style_function=lambda x: {
+                'fillColor': 'transparent',
+                'color': 'black',
+                'weight': '1'
+            },
+            tooltip=folium.GeoJsonTooltip(
+                fields=['postcode'],
+                aliases=['Postcode'],
+                localize=True
+            ),
+            highlight_function=lambda x: {
+                'weight': 3,
+                'color': 'red'
+            },
+        ).add_to(m)
 
         # Laagcontroles toevoegen
         folium.LayerControl().add_to(m)
