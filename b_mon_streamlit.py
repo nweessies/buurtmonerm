@@ -34,7 +34,6 @@ with col1:
     # GeoJSON 
     with open('data/PC_5_erm.geojson', 'r') as f:
         geo_data = json.load(f)
-
     
     # Maak een kaartobject aan
     m = folium.Map(location=[52.3017, 5.6203], zoom_start=12, tiles='CartoDB positron')
@@ -57,7 +56,7 @@ with col1:
     
     # Toevoegen van interactieve GeoJSON laag met popup
     geojson = folium.GeoJson(
-        geo_json,
+        geo_data,  # Verander geo_json naar geo_data
         style_function=lambda x: {'fillColor': 'transparent', 'color': 'black', 'weight':'1'},
         tooltip=folium.GeoJsonTooltip(
             fields=['postcode'],
@@ -69,6 +68,10 @@ with col1:
     # Laagcontroles toevoegen
     folium.LayerControl().add_to(m)
     
+    # Initialiseer session state als die nog niet bestaat
+    if 'selected_buurt' not in st.session_state:
+        st.session_state.selected_buurt = None
+    
     # Display map en vang events op
     map_data = st_folium(m, width=800, height=500)
     
@@ -79,8 +82,7 @@ with col1:
             selected_buurt = clicked_feature['properties']['postcode']
             if selected_buurt in df['PC5'].values:
                 st.session_state.selected_buurt = selected_buurt
-
-# Rechter kolom voor de grafiek
+    # Rechter kolom voor de grafiek
 with col2:
     buurten = df['WijkenEnBuurten'].to_list()
     
