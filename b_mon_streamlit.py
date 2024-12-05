@@ -53,10 +53,12 @@ with col1:
             st.stop()
 
         # Maak een kaartobject aan
+# Maak een kaartobject aan
         m = folium.Map(
             location=[52.3017, 5.6203],
             zoom_start=12,
-            tiles='CartoDB positron'
+            tiles='CartoDB positron',
+            crs='EPSG3857'  # Dit is de web mercator projectie die Folium gebruikt
         )
 
         # Maak de choropleth kaart
