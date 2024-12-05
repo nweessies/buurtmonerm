@@ -13,8 +13,10 @@ if 'selected_buurt' not in st.session_state:
     st.session_state.selected_buurt = None
 
 # Load data
-df = pd.read_csv('data/df_bevolking_z.csv')
+df = pd.read_csv('data/df_bevolking_scores.xlsx')
 df = df.drop(columns='Unnamed: 0')
+
+st.dataframe(df)
 
 st.title('Buurtmonitor Ermelo')
 
@@ -28,8 +30,10 @@ with col1:
     default_index = kolomlijst.index(default_kolom) if default_kolom in kolomlijst else 0
     indicator = st.selectbox("Selecteer een indicator:", kolomlijst, index=default_index)
     
-    # GeoJSON URL
-    geo_json = 'https://cartomap.github.io/nl/wgs84/buurt_2023.geojson'
+    # GeoJSON 
+    with open('data/PC_5_erm.geojson', 'r') as f:
+    geo_data = json.load(f)
+
     
     # Maak een kaartobject aan
     m = folium.Map(location=[52.3017, 5.6203], zoom_start=12, tiles='CartoDB positron')
@@ -39,15 +43,15 @@ with col1:
         geo_data=geo_json,
         name='Choropleth',
         data=df,
-        columns=['WijkenEnBuurten', indicator],
-        key_on='feature.properties.statnaam',
+        columns=['PC5', indicator],
+        key_on='feature.properties.postcode',
         fill_color='YlOrRd',
         nan_fill_opacity=0,
         fill_opacity=0.5,
         line_color='black',
         line_weight=0.00001,
         line_opacity=0.1,
-        legend_name='Bevolkingsdichtheid per buurt'
+        legend_name='indicator per postcode'
     ).add_to(m)
     
     # Toevoegen van interactieve GeoJSON laag met popup
@@ -55,7 +59,7 @@ with col1:
         geo_json,
         style_function=lambda x: {'fillColor': 'transparent', 'color': 'black', 'weight':'1'},
         tooltip=folium.GeoJsonTooltip(
-            fields=['statnaam'],
+            fields=['postcode'],
             localize=True
         ),
         highlight_function=lambda x: {'weight': 3, 'color': 'red'},
@@ -70,9 +74,9 @@ with col1:
     # Update selected_buurt als er op de kaart wordt geklikt
     if map_data.get('last_active_drawing'):
         clicked_feature = map_data['last_active_drawing']
-        if 'properties' in clicked_feature and 'statnaam' in clicked_feature['properties']:
-            selected_buurt = clicked_feature['properties']['statnaam']
-            if selected_buurt in df['WijkenEnBuurten'].values:
+        if 'properties' in clicked_feature and 'postcode' in clicked_feature['properties']:
+            selected_buurt = clicked_feature['properties']['postcode']
+            if selected_buurt in df['PC5'].values:
                 st.session_state.selected_buurt = selected_buurt
 
 # Rechter kolom voor de grafiek
