@@ -14,12 +14,12 @@ if 'selected_buurt' not in st.session_state:
     st.session_state.selected_buurt = None
 
 # Load data
+# Load data
 try:
-    df = pd.read_excel('data/data_bevolking_z-scores.xlsx', engine='openpyxl')
+    df = pd.read_csv('data/data_bevolking_z-scores.xlsx')  # Ondanks .xlsx extensie als CSV inlezen
 except Exception as e:
     st.error(f"Error loading data: {e}")
     st.stop()
-
 st.title('Buurtmonitor Ermelo')
 
 # Maak twee kolommen
