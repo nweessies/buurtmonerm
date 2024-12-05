@@ -93,10 +93,7 @@ with col1:
                 smooth_factor=0
             ).add_to(m)
 
-            # Voeg hover toe voor debugging
-            for key in choropleth._children:
-                if key.startswith('color_map'):
-                    choropleth._children[key].add_to(m)
+
 
             # Toevoegen van interactieve GeoJSON laag met popup
             geojson = folium.GeoJson(
