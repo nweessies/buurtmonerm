@@ -174,7 +174,7 @@ with col2:
 
         fig.update_layout(
             xaxis_range=[-4, 4],
-            xaxis_title="Score",
+            xaxis_title="Score, hoe hoger hoe kwetsbaarder",
             yaxis_title="Indicator",
             showlegend=False
         )
