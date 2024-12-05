@@ -40,100 +40,109 @@ with col1:
         st.write(df[['PC5', indicator]].head())
 
         # GeoJSON 
-        try:
-            with open('data/PC_5_erm.geojson', 'r') as f:
-                geo_data = json.load(f)
-                
-            # Convert to GeoDataFrame and transform coordinates
-            gdf = gpd.GeoDataFrame.from_features(geo_data['features'])
-            gdf = gdf.set_crs(epsg=28992)
-            gdf = gdf.to_crs(epsg=4326)
-            geo_data = json.loads(gdf.to_json())
-            
-            st.write("Voorbeeld van postcode formaat in GeoJSON:")
-            st.write(geo_data['features'][0]['properties']['postcode'])
-            
-            # Data checks
-            st.write("Unieke postcodes in DataFrame:", len(df['PC5'].unique()))
-            st.write("Unieke postcodes in GeoJSON:", len({f['properties']['postcode'] for f in geo_data['features']}))
-            
-        except FileNotFoundError:
-            st.error("GeoJSON bestand niet gevonden")
-            st.stop()
-        except Exception as e:
-            st.error(f"Error bij verwerken GeoJSON: {e}")
-            st.stop()
-
-        # Controleer of PC5 in DataFrame aanwezig is
-        if 'PC5' not in df.columns:
-            st.error("PC5 kolom niet gevonden in de data")
-            st.stop()
-
-        # Maak een kaartobject aan
-        m = folium.Map(
-            location=[52.3017, 5.6203],
-            zoom_start=12,
-            tiles='CartoDB positron'
-        )
-
-        # Maak de choropleth kaart
-        choropleth = folium.Choropleth(
-            geo_data=geo_data,
-            name='Choropleth',
-            data=df,
-            columns=['PC5', indicator],
-            key_on='feature.properties.postcode',
-            fill_color='YlOrRd',
-            nan_fill_opacity=0.2,
-            fill_opacity=0.7,
-            line_color='black',
-            line_weight=1,
-            line_opacity=0.5,
-            legend_name=f'{indicator} per postcode',
-            highlight=True,
-            smooth_factor=0
-        ).add_to(m)
-
-        # Voeg hover toe voor debugging
-        for key in choropleth._children:
-            if key.startswith('color_map'):
-                choropleth._children[key].add_to(m)
-
-        # Toevoegen van interactieve GeoJSON laag met popup
-        geojson = folium.GeoJson(
-            geo_data,
-            style_function=lambda x: {
-                'fillColor': 'transparent',
-                'color': 'black',
-                'weight': '1'
-            },
-            tooltip=folium.GeoJsonTooltip(
-                fields=['postcode'],
-                aliases=['Postcode'],
-                localize=True
-            ),
-            highlight_function=lambda x: {
-                'weight': 3,
-                'color': 'red'
-            },
-        ).add_to(m)
-
-        # Laagcontroles toevoegen
-        folium.LayerControl().add_to(m)
-
-        # Display map en vang events op
-        map_data = st_folium(m, width=800, height=500)
-
-        # Update selected_buurt als er op de kaart wordt geklikt
-        if map_data.get('last_active_drawing'):
-            clicked_feature = map_data['last_active_drawing']
-            if 'properties' in clicked_feature and 'postcode' in clicked_feature['properties']:
-                selected_buurt = clicked_feature['properties']['postcode']
-                if selected_buurt in df['PC5'].values:
-                    st.session_state.selected_buurt = selected_buurt
-
+    try:
+        with open('data/PC_5_erm.geojson', 'r') as f:
+            geo_data = json.load(f)
+        
+        # Filter GeoJSON features
+        postcodes_in_df = set(df['PC5'].unique())
+        filtered_features = [feature for feature in geo_data['features'] 
+                            if feature['properties']['postcode'] in postcodes_in_df]
+        
+        # Maak nieuwe gefilterde GeoJSON
+        filtered_geo_data = {
+            'type': 'FeatureCollection',
+            'crs': geo_data['crs'],
+            'features': filtered_features
+        }
+        
+        # Convert to GeoDataFrame and transform coordinates
+        gdf = gpd.GeoDataFrame.from_features(filtered_geo_data['features'])
+        gdf = gdf.set_crs(epsg=28992)
+        gdf = gdf.to_crs(epsg=4326)
+        filtered_geo_data = json.loads(gdf.to_json())
+        
+        st.write("Voorbeeld van postcode formaat in GeoJSON:")
+        st.write(filtered_geo_data['features'][0]['properties']['postcode'])
+        
+        # Data checks
+        st.write("Unieke postcodes in DataFrame:", len(df['PC5'].unique()))
+        st.write("Unieke postcodes in gefilterde GeoJSON:", len({f['properties']['postcode'] for f in filtered_geo_data['features']}))
+        
+    except FileNotFoundError:
+        st.error("GeoJSON bestand niet gevonden")
+        st.stop()
     except Exception as e:
-        st.error(f"Error in kaart sectie: {e}")
+        st.error(f"Error bij verwerken GeoJSON: {e}")
+        st.stop()
+    
+    # Controleer of PC5 in DataFrame aanwezig is
+    if 'PC5' not in df.columns:
+        st.error("PC5 kolom niet gevonden in de data")
+        st.stop()
+    
+    # Maak een kaartobject aan
+    m = folium.Map(
+        location=[52.3017, 5.6203],
+        zoom_start=12,
+        tiles='CartoDB positron'
+    )
+    
+    # Maak de choropleth kaart
+    choropleth = folium.Choropleth(
+        geo_data=filtered_geo_data,
+        name='Choropleth',
+        data=df,
+        columns=['PC5', indicator],
+        key_on='feature.properties.postcode',
+        fill_color='YlOrRd',
+        nan_fill_opacity=0.2,
+        fill_opacity=0.7,
+        line_color='black',
+        line_weight=1,
+        line_opacity=0.5,
+        legend_name=f'{indicator} per postcode',
+        highlight=True,
+        smooth_factor=0
+    ).add_to(m)
+    
+    # Voeg hover toe voor debugging
+    for key in choropleth._children:
+        if key.startswith('color_map'):
+            choropleth._children[key].add_to(m)
+    
+    # Toevoegen van interactieve GeoJSON laag met popup
+    geojson = folium.GeoJson(
+        filtered_geo_data,
+        style_function=lambda x: {
+            'fillColor': 'transparent',
+            'color': 'black',
+            'weight': '1'
+        },
+        tooltip=folium.GeoJsonTooltip(
+            fields=['postcode'],
+            aliases=['Postcode'],
+            localize=True
+        ),
+        highlight_function=lambda x: {
+            'weight': 3,
+            'color': 'red'
+        },
+    ).add_to(m)
+    
+    # Laagcontroles toevoegen
+    folium.LayerControl().add_to(m)
+    
+    # Display map en vang events op
+    map_data = st_folium(m, width=800, height=500)
+    
+    # Update selected_buurt als er op de kaart wordt geklikt
+    if map_data.get('last_active_drawing'):
+        clicked_feature = map_data['last_active_drawing']
+        if 'properties' in clicked_feature and 'postcode' in clicked_feature['properties']:
+            selected_buurt = clicked_feature['properties']['postcode']
+            if selected_buurt in df['PC5'].values:
+                st.session_state.selected_buurt = selected_buurt
 
 # Rechter kolom voor de grafiek
 with col2:
