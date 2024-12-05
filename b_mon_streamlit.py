@@ -32,7 +32,7 @@ with col1:
     
     # GeoJSON 
     with open('data/PC_5_erm.geojson', 'r') as f:
-    geo_data = json.load(f)
+        geo_data = json.load(f)
 
     
     # Maak een kaartobject aan
