@@ -4,6 +4,7 @@ import folium
 import numpy as np
 from streamlit_folium import st_folium
 import plotly.express as px
+import json
 
 # Page config
 st.set_page_config(layout="wide")
