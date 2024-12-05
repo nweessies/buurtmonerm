@@ -33,10 +33,16 @@ with col1:
         default_index = kolomlijst.index(default_kolom) if default_kolom in kolomlijst else 0
         indicator = st.selectbox("Selecteer een indicator:", kolomlijst, index=default_index)
 
+        # Debug informatie
+        st.write("Eerste paar rijen van je DataFrame:")
+        st.write(df[['PC5', indicator]].head())
+
         # GeoJSON 
         try:
             with open('data/PC_5_erm.geojson', 'r') as f:
                 geo_data = json.load(f)
+                st.write("Voorbeeld van postcode formaat in GeoJSON:")
+                st.write(geo_data['features'][0]['properties']['postcode'])
         except FileNotFoundError:
             st.error("GeoJSON bestand niet gevonden")
             st.stop()
@@ -46,13 +52,13 @@ with col1:
             st.error("PC5 kolom niet gevonden in de data")
             st.stop()
 
-        # Debug informatie toevoegen boven de kaart code
-        st.write("Eerste paar rijen van je DataFrame:")
-        st.write(df[['PC5', indicator]].head())
-        
-        st.write("Voorbeeld van postcode formaat in GeoJSON:")
-        st.write(geo_data['features'][0]['properties']['postcode'])
-        
+        # Maak een kaartobject aan
+        m = folium.Map(
+            location=[52.3017, 5.6203],
+            zoom_start=12,
+            tiles='CartoDB positron'
+        )
+
         # Maak de choropleth kaart
         choropleth = folium.Choropleth(
             geo_data=geo_data,
@@ -61,11 +67,11 @@ with col1:
             columns=['PC5', indicator],
             key_on='feature.properties.postcode',
             fill_color='YlOrRd',
-            nan_fill_opacity=0.2,  # Verhoogd zodat je kunt zien waar data mist
-            fill_opacity=0.7,      # Verhoogd voor betere zichtbaarheid
+            nan_fill_opacity=0.2,
+            fill_opacity=0.7,
             line_color='black',
-            line_weight=1,         # Verhoogd voor betere zichtbaarheid
-            line_opacity=0.5,      # Verhoogd voor betere zichtbaarheid
+            line_weight=1,
+            line_opacity=0.5,
             legend_name=f'{indicator} per postcode',
             highlight=True
         ).add_to(m)
@@ -74,6 +80,7 @@ with col1:
         for key in choropleth._children:
             if key.startswith('color_map'):
                 choropleth._children[key].add_to(m)
+
                 # Toevoegen van interactieve GeoJSON laag met popup
                 geojson = folium.GeoJson(
                     geo_data,
