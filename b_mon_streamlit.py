@@ -14,7 +14,7 @@ if 'selected_buurt' not in st.session_state:
 
 # Load data
 df = pd.read_csv('data/data_bevolking_z-scores.xlsx')
-df = df.drop(columns='Unnamed: 0')
+#df = df.drop(columns='Unnamed: 0')
 
 st.dataframe(df)
 
