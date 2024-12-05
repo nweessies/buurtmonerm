@@ -13,7 +13,7 @@ if 'selected_buurt' not in st.session_state:
     st.session_state.selected_buurt = None
 
 # Load data
-df = pd.read_csv('data/df_bevolking_scores.xlsx')
+df = pd.read_csv('data/df_bevolking_z-scores.xlsx')
 df = df.drop(columns='Unnamed: 0')
 
 st.dataframe(df)
