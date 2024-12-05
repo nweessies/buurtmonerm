@@ -41,7 +41,7 @@ with col1:
     
     # Maak de choropleth kaart
     choropleth = folium.Choropleth(
-        geo_data=geo_json,
+        geo_data=geo_data,
         name='Choropleth',
         data=df,
         columns=['PC5', indicator],
