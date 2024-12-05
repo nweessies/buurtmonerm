@@ -46,13 +46,13 @@ with col1:
             st.error("PC5 kolom niet gevonden in de data")
             st.stop()
 
-        # Maak een kaartobject aan
-        m = folium.Map(
-            location=[52.3017, 5.6203],
-            zoom_start=12,
-            tiles='CartoDB positron'
-        )
-
+        # Debug informatie toevoegen boven de kaart code
+        st.write("Eerste paar rijen van je DataFrame:")
+        st.write(df[['PC5', indicator]].head())
+        
+        st.write("Voorbeeld van postcode formaat in GeoJSON:")
+        st.write(geo_data['features'][0]['properties']['postcode'])
+        
         # Maak de choropleth kaart
         choropleth = folium.Choropleth(
             geo_data=geo_data,
@@ -61,32 +61,37 @@ with col1:
             columns=['PC5', indicator],
             key_on='feature.properties.postcode',
             fill_color='YlOrRd',
-            nan_fill_opacity=0,
-            fill_opacity=0.5,
+            nan_fill_opacity=0.2,  # Verhoogd zodat je kunt zien waar data mist
+            fill_opacity=0.7,      # Verhoogd voor betere zichtbaarheid
             line_color='black',
-            line_weight=0.00001,
-            line_opacity=0.1,
-            legend_name=f'{indicator} per postcode'
+            line_weight=1,         # Verhoogd voor betere zichtbaarheid
+            line_opacity=0.5,      # Verhoogd voor betere zichtbaarheid
+            legend_name=f'{indicator} per postcode',
+            highlight=True
         ).add_to(m)
 
-        # Toevoegen van interactieve GeoJSON laag met popup
-        geojson = folium.GeoJson(
-            geo_data,
-            style_function=lambda x: {
-                'fillColor': 'transparent',
-                'color': 'black',
-                'weight': '1'
-            },
-            tooltip=folium.GeoJsonTooltip(
-                fields=['postcode'],
-                aliases=['Postcode'],
-                localize=True
-            ),
-            highlight_function=lambda x: {
-                'weight': 3,
-                'color': 'red'
-            },
-        ).add_to(m)
+        # Voeg hover toe voor debugging
+        for key in choropleth._children:
+            if key.startswith('color_map'):
+                choropleth._children[key].add_to(m
+                # Toevoegen van interactieve GeoJSON laag met popup
+                geojson = folium.GeoJson(
+                    geo_data,
+                    style_function=lambda x: {
+                        'fillColor': 'transparent',
+                        'color': 'black',
+                        'weight': '1'
+                    },
+                    tooltip=folium.GeoJsonTooltip(
+                        fields=['postcode'],
+                        aliases=['Postcode'],
+                        localize=True
+                    ),
+                    highlight_function=lambda x: {
+                        'weight': 3,
+                        'color': 'red'
+                    },
+                ).add_to(m)
 
         # Laagcontroles toevoegen
         folium.LayerControl().add_to(m)
