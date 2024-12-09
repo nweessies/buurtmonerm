@@ -91,6 +91,7 @@ with col1:
                 legend_name=f'{indicator} per postcode',
                 highlight=True,
                 smooth_factor=0,
+                bins=15,
                 quantiles=True
             ).add_to(m)
 
