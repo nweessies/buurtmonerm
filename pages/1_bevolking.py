@@ -90,7 +90,8 @@ with col1:
                 line_opacity=0.5,
                 legend_name=f'{indicator} per postcode',
                 highlight=True,
-                smooth_factor=0
+                smooth_factor=0,
+                quantiles=True
             ).add_to(m)
 
 
