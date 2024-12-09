@@ -17,7 +17,7 @@ if 'selected_buurt' not in st.session_state:
 
 # Load data
 try:
-    df = pd.read_csv('buurtmonerm/data/data_bevolking_z-scores.xlsx')  # Ondanks .xlsx extensie als CSV inlezen
+    df = pd.read_csv('data/data_bevolking_z-scores.xlsx')  # Ondanks .xlsx extensie als CSV inlezen
 except Exception as e:
     st.error(f"Error loading data: {e}")
     st.stop()
