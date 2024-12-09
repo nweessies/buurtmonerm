@@ -40,7 +40,7 @@ with col1:
 
         # GeoJSON 
         try:
-            with open('buurtmonerm/data/PC_5_erm.geojson', 'r') as f:
+            with open('data/PC_5_erm.geojson', 'r') as f:
                 geo_data = json.load(f)
             
             # Filter GeoJSON features
