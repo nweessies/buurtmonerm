@@ -92,7 +92,8 @@ with col1:
                 highlight=True,
                 smooth_factor=0,
                 bins=15,
-                quantiles=True
+                quantiles=True,
+                legend_loc='bottomleft'
             ).add_to(m)
 
 
