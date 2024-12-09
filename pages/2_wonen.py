@@ -8,9 +8,11 @@ import json
 import geopandas as gpd
 from pyproj import transform, Proj
 
+st.set_page_config(layout="wide")
+
 st.title("Thema: Wonen")
 # Page config
-st.set_page_config(layout="wide")
+
 
 # Initialize session state
 if 'selected_buurt' not in st.session_state:
