@@ -94,7 +94,7 @@ with col1:
                 legend_name=f'{indicator} per postcode',
                 highlight=True,
                 smooth_factor=0,
-                bins=7,  # Aantal kleurgroepen
+                bins=15,  # Aantal kleurgroepen
                 quantiles=True  # Gebruik kwantielen in plaats van gelijke intervals
             ).add_to(m)
 
